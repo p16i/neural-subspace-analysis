@@ -53,7 +53,7 @@ def test_reconstruction_error_with_low_rank_projection_evaluator(
         verbose=False,
     )
 
-    assert df.shape == (len(arr_ks), 3)  # 3 metrics
+    assert df.shape == (len(arr_ks), 4)  # 3 metrics
 
     assert df.columns.tolist() == ["k", *evaluator.metric_keys]
 

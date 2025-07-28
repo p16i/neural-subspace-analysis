@@ -18,7 +18,7 @@ class ReconstructionErrorWithLowRankProjectionEvaluator(EvaluatorWithLowRankProj
 
     @property
     def metric_keys(self):
-        return ["norm", "recon_err"]
+        return ["norm", "recon_err", "cossim"]
 
     def evaluate(self, model, layer, dataloader, U, arr_ks, device="cpu", verbose=True):
         n = len(arr_ks)
@@ -29,6 +29,10 @@ class ReconstructionErrorWithLowRankProjectionEvaluator(EvaluatorWithLowRankProj
             base_metric=MeanMetric(),
         )
         arr_metric_recon = ArrayMetric(
+            n=n,
+            base_metric=MeanMetric(),
+        )
+        arr_metric_cosine = ArrayMetric(
             n=n,
             base_metric=MeanMetric(),
         )
@@ -46,9 +50,9 @@ class ReconstructionErrorWithLowRankProjectionEvaluator(EvaluatorWithLowRankProj
         ):
             x = batch[0] if isinstance(batch, Sequence) else batch
 
-            logits = model(x).detach().cpu()  # Ensure logits are on CPU
+            output = model(x).detach().cpu()  # Ensure logits are on CPU
 
-            norm = torch.linalg.norm(logits, ord=2, dim=1)
+            norm = torch.linalg.norm(output, ord=2, dim=1)
             metric_norm.update(norm)
 
             for kix, k in enumerate(arr_ks):
@@ -63,30 +67,35 @@ class ReconstructionErrorWithLowRankProjectionEvaluator(EvaluatorWithLowRankProj
                             device=device,
                         )
                     )
-                    recon_logits = model(x).detach().cpu()
+                    recon_output = model(x).detach().cpu()
 
-                    assert len(logits) == len(recon_logits)
+                    assert len(output) == len(recon_output)
 
                     err = torch.linalg.norm(
-                        logits - recon_logits, ord=2, dim=1
+                        output - recon_output, ord=2, dim=1
                     )  # Compute reconstruction error
+                    arr_metric_recon.update(kix, err.cpu())
 
                     # fixme add cosine
-
-                    arr_metric_recon.update(kix, err.cpu())
+                    cosine_sim = torch.nn.functional.cosine_similarity(
+                        output, recon_output, dim=1
+                    )
+                    arr_metric_cosine.update(kix, cosine_sim.cpu())
 
                 except Exception as e:
                     raise e
                 finally:
                     if hook is not None:
                         hook.remove()
-        arr_metric_recon = arr_metric_recon.compute()
 
         # this just make sure we have the same data types
         arr_metric_norm = np.ones(n) * float(metric_norm.compute())
 
+        arr_metric_recon = arr_metric_recon.compute()
+        arr_metric_cosine = arr_metric_cosine.compute()
+
         data = dict(
-            zip(["k", *self.metric_keys], [arr_ks, arr_metric_norm, arr_metric_recon])
+            zip(["k", *self.metric_keys], [arr_ks, arr_metric_norm, arr_metric_recon, arr_metric_cosine])
         )
 
         return pd.DataFrame(data=data)
