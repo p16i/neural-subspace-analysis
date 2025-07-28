@@ -5,7 +5,7 @@ import re
 
 import numpy as np
 
-from scipy.stats import ortho_group
+from scipy.stats import ortho_group  # type: ignore
 
 
 def get_device() -> str:
@@ -18,10 +18,10 @@ def get_device() -> str:
 def arange_with_grid(start: int, stop: int, step: int) -> typing.List[int]:
 
     arr_ds = np.arange(start, stop, step=step)
+    arr_ds_list = arr_ds.tolist()
+    arr_ds_list = [*arr_ds_list, stop]
 
-    arr_ds = arr_ds.tolist() + [stop]
-
-    return arr_ds
+    return arr_ds_list
 
 
 # fixme : use torch tensor instead
