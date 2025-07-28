@@ -1,0 +1,77 @@
+from torchmetrics import MeanMetric
+from tqdm.autonotebook import tqdm
+import torch
+import numpy as np
+
+
+import pandas as pd
+
+from nsa import intercepts
+from nsa.utils.metrics import ArrayMetric
+
+from .interface import EvaluatorWithLowRankProjection
+
+
+class ReconstructionErrorWithLowRankProjectionEvaluator(EvaluatorWithLowRankProjection):
+
+    @property
+    def metric_keys(self):
+        return ["norm", "recon_err"]
+
+    def evaluate(self, model, layer, dataloader, U, arr_ks, device="cpu", verbose=True):
+        n = len(arr_ks)
+
+        metric_norm = MeanMetric()
+        arr_metric_norm = ArrayMetric(
+            n=n,
+            base_metric=MeanMetric(),
+        )
+        arr_metric_recon = ArrayMetric(
+            n=n,
+            base_metric=MeanMetric(),
+        )
+
+        for x, _ in tqdm(
+            dataloader,
+            desc=f"[layer={layer}] evaluating reconstruction error",
+            disable=not verbose,
+        ):
+            x = x.to(device)
+            logits = model(x).detach().cpu()  # Ensure logits are on CPU
+
+            norm = torch.linalg.norm(logits, ord=2, dim=1)
+            metric_norm.update(norm)
+
+            for kix, k in enumerate(arr_ks):
+                Uk = U[:, :k]
+                hook = None
+                try:
+                    module = intercepts.get_module_for_layer(model=model, layer=layer)
+                    hook = module.register_forward_hook(
+                        intercepts.construct_fh_with_projection(Uk, device=device)
+                    )
+                    recon_logits = model(x).detach().cpu()
+
+                    assert len(logits) == len(recon_logits)
+
+                    err = torch.linalg.norm(
+                        logits - recon_logits, ord=2, dim=1
+                    )  # Compute reconstruction error
+
+                    arr_metric_recon.update(kix, err.cpu())
+
+                except Exception as e:
+                    raise e
+                finally:
+                    if hook is not None:
+                        hook.remove()
+        arr_metric_recon = arr_metric_recon.compute()
+
+        # this just make sure we have the same data types
+        arr_metric_norm = np.ones(n) * float(metric_norm.compute())
+
+        data = dict(
+            zip(["k", *self.metric_keys], [arr_ks, arr_metric_norm, arr_metric_recon])
+        )
+
+        return pd.DataFrame(data=data)
