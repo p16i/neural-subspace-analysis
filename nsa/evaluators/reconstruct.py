@@ -1,3 +1,4 @@
+from typing import Sequence
 from torchmetrics import MeanMetric
 from tqdm.autonotebook import tqdm
 import torch
@@ -7,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from nsa import intercepts
+from nsa.feature_map_shape_normalizers import resolve_shape_normalizer
 from nsa.utils.metrics import ArrayMetric
 
 from .interface import EvaluatorWithLowRankProjection
@@ -31,12 +33,19 @@ class ReconstructionErrorWithLowRankProjectionEvaluator(EvaluatorWithLowRankProj
             base_metric=MeanMetric(),
         )
 
-        for x, _ in tqdm(
+        layer, feature_map_shape_normalizer = resolve_shape_normalizer(
+            model=model,
+            layer=layer,
+            dataloader=dataloader,
+        )
+
+        for batch in tqdm(
             dataloader,
             desc=f"[layer={layer}] evaluating reconstruction error",
             disable=not verbose,
         ):
-            x = x.to(device)
+            x = batch[0] if isinstance(batch, Sequence) else batch
+
             logits = model(x).detach().cpu()  # Ensure logits are on CPU
 
             norm = torch.linalg.norm(logits, ord=2, dim=1)
@@ -48,7 +57,11 @@ class ReconstructionErrorWithLowRankProjectionEvaluator(EvaluatorWithLowRankProj
                 try:
                     module = intercepts.get_module_for_layer(model=model, layer=layer)
                     hook = module.register_forward_hook(
-                        intercepts.construct_fh_with_projection(Uk, device=device)
+                        intercepts.construct_fh_with_projection(
+                            Uk,
+                            shape_normalizer=feature_map_shape_normalizer,
+                            device=device,
+                        )
                     )
                     recon_logits = model(x).detach().cpu()
 
@@ -57,6 +70,8 @@ class ReconstructionErrorWithLowRankProjectionEvaluator(EvaluatorWithLowRankProj
                     err = torch.linalg.norm(
                         logits - recon_logits, ord=2, dim=1
                     )  # Compute reconstruction error
+
+                    # fixme add cosine
 
                     arr_metric_recon.update(kix, err.cpu())
 

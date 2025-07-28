@@ -8,7 +8,12 @@ from tqdm.autonotebook import tqdm
 import pandas as pd
 
 from nsa import intercepts
+from nsa.feature_map_shape_normalizers import (
+    FeatureMapShapeNormalizer,
+    resolve_shape_normalizer,
+)
 from nsa.utils.metrics import ArrayMetric
+
 from .interface import EvaluatorWithLowRankProjection
 
 
@@ -32,6 +37,12 @@ class AccuracyWithLowRankProjectionEvaluator(EvaluatorWithLowRankProjection):
             base_metric=MeanMetric(),
         )
 
+        layer, feature_map_shape_normalizer = resolve_shape_normalizer(
+            model=model,
+            layer=layer,
+            dataloader=dataloader,
+        )
+
         for x, y in tqdm(
             dataloader, desc=f"[layer={layer}] evaluating accuracy", disable=not verbose
         ):
@@ -44,10 +55,16 @@ class AccuracyWithLowRankProjectionEvaluator(EvaluatorWithLowRankProjection):
                 try:
                     module = intercepts.get_module_for_layer(model=model, layer=layer)
                     hook = module.register_forward_hook(
-                        intercepts.construct_fh_with_projection(Uk, device=device)
+                        intercepts.construct_fh_with_projection(
+                            Uk,
+                            shape_normalizer=feature_map_shape_normalizer,
+                            device=device,
+                        )
                     )
 
                     logits = model(x).detach().cpu()
+
+                    print(logits.shape)
 
                     xent = nn.functional.cross_entropy(logits, y, reduction="none")
                     arr_metric_acc.update(kix, logits, y)

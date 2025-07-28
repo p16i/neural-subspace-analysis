@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
+import typing
+import torch
 
 from numpy import typing as npt
 from torch.utils.data import DataLoader
@@ -7,11 +9,17 @@ from torch import nn
 
 import pandas as pd
 
+from nsa.feature_map_shape_normalizers import FeatureMapShapeNormalizer
+
 
 class EvaluatorWithLowRankProjection(ABC):
     """
     Abstract base class for evaluators.
     """
+
+    feature_map_transform: typing.Optional[
+        typing.Callable[[list[torch.Tensor]], torch.Tensor]
+    ]
 
     @abstractmethod
     def evaluate(
