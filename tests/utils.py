@@ -69,3 +69,55 @@ def test_parse_layers(txt, default_layers, expected):
     actual = utils.parse_layers(txt, default_layers)
 
     np.testing.assert_equal(actual, expected)
+
+
+@torch.no_grad()
+def test_solve_eigh_basic():
+    # Symmetric matrix
+    A = np.array([[2.0, 1.0], [1.0, 2.0]])
+    eigvals, eigvecs = utils.eigh(torch.from_numpy(A))
+
+    eigvals = eigvals.numpy()
+    eigvecs = eigvecs.numpy()
+    # Check eigenvalues
+    expected_eigvals = np.linalg.eigvalsh(A)
+    np.testing.assert_allclose(eigvals, np.sort(expected_eigvals)[::-1], rtol=1e-6)
+    # Check eigenvectors (orthonormal)
+    assert np.allclose(np.dot(eigvecs.T, eigvecs), np.eye(eigvecs.shape[1]), atol=1e-6)
+    # Check reconstruction
+    A_recon = eigvecs @ np.diag(eigvals) @ eigvecs.T
+    np.testing.assert_allclose(A, A_recon, rtol=1e-6)
+    assert (
+        eigvals[:-1] - eigvals[1:] >= 0
+    ).all(), "Eigenvalues should be sorted in ascending order"
+
+
+def test_solve_eigh_identity():
+    A = np.eye(4)
+    eigvals, eigvecs = utils.eigh(torch.from_numpy(A))
+    np.testing.assert_allclose(eigvals, np.ones(4))
+    np.testing.assert_allclose(eigvecs @ eigvecs.T, np.eye(4), atol=1e-6)
+
+
+def test_solve_eigh_diag():
+    eigvals = [1, 4.0, 3, 2.0]
+    A = np.diag(eigvals)
+    eigvals, eigvecs = utils.eigh(torch.from_numpy(A))
+    np.testing.assert_allclose(eigvals, sorted(eigvals)[::-1])
+    np.testing.assert_allclose(eigvecs @ eigvecs.T, np.eye(4), atol=1e-6)
+
+
+def test_solve_eigh_random_symmetric():
+    np.random.seed(42)
+    A = np.random.randn(5, 5)
+    A = (A + A.T) / 2  # Make symmetric
+    eigvals, eigvecs = utils.eigh(torch.from_numpy(A))
+
+    eigvals = eigvals.numpy()
+    eigvecs = eigvecs.numpy()
+
+    # Eigenvectors should be orthonormal
+    np.testing.assert_allclose(eigvecs.T @ eigvecs, np.eye(5), atol=1e-6)
+    # Reconstruction
+    A_recon = eigvecs @ np.diag(eigvals) @ eigvecs.T
+    np.testing.assert_allclose(A, A_recon, rtol=1e-6)

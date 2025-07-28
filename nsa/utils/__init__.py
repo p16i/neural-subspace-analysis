@@ -24,6 +24,29 @@ def arange_with_grid(start: int, stop: int, step: int) -> typing.List[int]:
     return arr_ds_list
 
 
+def eigh(cov: torch.Tensor) -> typing.Tuple[torch.Tensor, torch.Tensor]:
+    """_summary_
+
+    Args:
+        cov (torch.Tensor): _description_
+
+    Returns:
+        typing.Tuple[torch.Tensor, torch.Tensor]: _description_
+    """
+
+    d1, d2 = cov.shape
+    assert d1 == d2
+
+    eigvals, eigvecs = torch.linalg.eigh(cov)
+
+    assert len(eigvals.shape) == 1
+
+    eigvals = torch.flip(eigvals, dims=(0,))
+    eigvecs = torch.flip(eigvecs, dims=(1,))
+
+    return eigvals, eigvecs
+
+
 # fixme : use torch tensor instead
 # def _solve_eigh(cov: npt.NDArray) -> typing.Tuple[NDArray, NDArray]:
 #     raise NotImplementedError("use torch tensor instead")
