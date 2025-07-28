@@ -7,6 +7,8 @@ from torch.nn import functional as F
 
 from nsa import utils
 
+from nsa.feature_map_shape_normalizers import FeatureMapShapeNormalizer
+
 
 ATTRIBUTE_OUTPUT_KEY = "__output"
 
@@ -46,7 +48,11 @@ def get_module_for_layer(model: nn.Module, layer: str) -> nn.Module:
     return module
 
 
-def construct_fh_with_projection(U: torch.Tensor, device="cpu") -> typing.Callable:
+def construct_fh_with_projection(
+    U: torch.Tensor,
+    shape_normalizer: typing.Optional[FeatureMapShapeNormalizer] = None,
+    device="cpu",
+) -> typing.Callable:
 
     d, K = U.shape
 
@@ -56,9 +62,20 @@ def construct_fh_with_projection(U: torch.Tensor, device="cpu") -> typing.Callab
 
     def fh(mod, inp, out):
         orig_shape = out.shape
-        out = utils.reshape_tensor_to_cnn_like(out)
 
+        # canonicalize the featuremap shape
+        if shape_normalizer is not None:
+            out = shape_normalizer.to_cnn_shape(out)
+
+        print(out.shape)
         out = F.conv2d(out, UUT)
+
+        # decanonicalize the featuremap shape
+        if shape_normalizer is not None:
+            out = shape_normalizer.to_original_shape(out)
+            assert (
+                out.shape == orig_shape
+            ), f"Expected shape {orig_shape}, got {out.shape}"
 
         return out.reshape(orig_shape)
 

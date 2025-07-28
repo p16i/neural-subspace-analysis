@@ -5,7 +5,7 @@ import re
 
 import numpy as np
 
-from scipy.stats import ortho_group  # type: ignore
+from scipy.stats import ortho_group  # type: ignor
 
 
 def get_device() -> str:
@@ -13,6 +13,11 @@ def get_device() -> str:
         return "cuda"
     else:
         return "cpu"
+
+
+def first_tensor_in_batch(batch) -> torch.Tensor:
+    x = batch[0] if isinstance(batch, typing.Sequence) else batch
+    return x
 
 
 def arange_with_grid(start: int, stop: int, step: int) -> typing.List[int]:
