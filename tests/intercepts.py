@@ -2,13 +2,18 @@ import pytest
 
 import numpy as np
 
+from torch.utils.data import DataLoader, TensorDataset
 
 from collections import OrderedDict
 
 import torch
 from torch import nn
 
-from nsa import intercepts, utils
+from nsa import intercepts, utils, feature_map_shape_normalizers
+from nsa.feature_map_shape_normalizers import (
+    MLPFeatureMapShapeNormalizer,
+    ViTFeatureMapShapeNormalizer,
+)
 
 
 class MLP3(nn.Module):
@@ -36,6 +41,7 @@ class CNN3(nn.Module):
         self.d = d
         self.conv1 = nn.Conv2d(1, d, kernel_size=3, padding=1)
         self.act1 = nn.ReLU()
+        self.avgpool1 = nn.AdaptiveAvgPool2d(18) 
         self.conv2 = nn.Conv2d(d, d, kernel_size=3, padding=1)
         self.act2 = nn.ReLU()
         self.avgpool = nn.AdaptiveAvgPool2d(1)  # Outpu
@@ -45,8 +51,10 @@ class CNN3(nn.Module):
     def forward(self, x):
         x = self.conv1(x)
         x = self.act1(x)
+        x = self.avgpool1(x)  # Output shape: (batch_size, d, 18, 18)
         x = self.conv2(x)
         x = self.act2(x)
+        print("xxx", x.shape)  # Debugging line to check shape
         x = self.avgpool(x)  # Output shape: (batch_size, d, 1, 1)
         x = torch.flatten(x, 1)  # Flatten the output to (batch_size, d)
         x = self.fc(x)
@@ -57,8 +65,14 @@ class CNN3(nn.Module):
 
 
 @torch.no_grad()
-@pytest.mark.parametrize("model", [MLP3(), CNN3()])
-def test_projection(model):
+@pytest.mark.parametrize(
+    "model,shape_normalizer",
+    [
+        (MLP3(), feature_map_shape_normalizers.MLPFeatureMapShapeNormalizer()),
+        (CNN3(), None),
+    ],
+)
+def test_projection(model, shape_normalizer):
     rng = torch.Generator()
     rng.manual_seed(1)
 
@@ -70,7 +84,9 @@ def test_projection(model):
     hook = None
     try:
         hook = model.act1.register_forward_hook(
-            intercepts.construct_fh_with_projection(U)
+            intercepts.construct_fh_with_projection(
+                U, shape_normalizer=shape_normalizer
+            )
         )
 
         actual = model(x).cpu().numpy()
@@ -121,3 +137,23 @@ def test_intercept():
     finally:
         if hook is not None:
             hook.remove()
+
+
+@pytest.mark.parametrize(
+    "model,input,layer,expecteted_shape",
+    [
+        (MLP3(), torch.randn(20, 784), "act1", (20, 100)),
+        (CNN3(), torch.randn(20, 1, 28, 28), "avgpool1", (20, 100, 18, 18)),
+    ],
+)
+def test_feature_map_shape(model, input, layer, expecteted_shape):
+    b = input.shape[0]
+
+    dl = DataLoader(TensorDataset(input), batch_size=b)
+
+    actual = intercepts.get_feature_map_shape(
+        model=model,
+        layer=layer,
+        dataloader=dl,
+    )
+    np.testing.assert_allclose(actual, expecteted_shape)

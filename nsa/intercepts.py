@@ -7,7 +7,7 @@ from torch.nn import functional as F
 
 from nsa import utils
 
-from nsa.feature_map_shape_normalizers import FeatureMapShapeNormalizer
+from nsa.feature_map_shape_normalizers.interface import FeatureMapShapeNormalizer
 
 
 ATTRIBUTE_OUTPUT_KEY = "__output"
@@ -80,3 +80,30 @@ def construct_fh_with_projection(
         return out.reshape(orig_shape)
 
     return fh
+
+
+def get_feature_map_shape(
+    model: nn.Module,
+    layer: str,
+    dataloader: torch.utils.data.DataLoader,
+    device: str = "cpu",
+) -> torch.Size:
+
+    hook = None
+    try:
+        batch = next(iter(dataloader))
+        x = utils.first_tensor_in_batch(batch)
+
+        module = get_module_for_layer(model=model, layer=layer)
+        hook = module.register_forward_hook(fh_intercept_output)
+
+        model(x.to(device))
+
+        output = get_module_output(module)
+        shape = output.shape
+
+    finally:
+        if hook is not None:
+            hook.remove()
+
+    return shape

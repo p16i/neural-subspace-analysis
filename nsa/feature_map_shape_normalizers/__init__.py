@@ -1,0 +1,43 @@
+import typing
+import torch
+
+from torch import nn
+
+from nsa import utils, intercepts
+
+from .interface import FeatureMapShapeNormalizer
+
+from .vits import ViTFeatureMapShapeNormalizer
+from .mlps import MLPFeatureMapShapeNormalizer
+
+
+@torch.no_grad()
+def resolve_shape_normalizer(
+    model: nn.Module,
+    layer: str,
+    dataloader: torch.utils.data.DataLoader,
+    device: str = "cpu",
+) -> typing.Tuple[str, FeatureMapShapeNormalizer]:
+
+    shape = intercepts.get_feature_map_shape(
+        model=model,
+        layer=layer,
+        dataloader=dataloader,
+        device=device,
+    )
+
+    if len(shape) == 4:
+        return layer, None
+    elif len(shape) == 2:
+        return layer, MLPFeatureMapShapeNormalizer()
+    elif len(shape) == 3:
+        if "[cls]" in layer:
+            layer = layer.replace("[cls]", "")
+            raise NotImplementedError()
+        else:
+            return layer, ViTFeatureMapShapeNormalizer()
+    else:
+        raise ValueError(
+            f"Unsupported shape {shape} for layer {layer}. "
+            "Expected 1D, 3D, or 4D tensor shapes."
+        )

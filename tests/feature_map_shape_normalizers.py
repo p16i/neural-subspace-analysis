@@ -2,7 +2,10 @@ import pytest
 import torch
 import numpy as np
 
-from nsa.feature_map_shape_normalizers import ViTFeatureMapShapeNormalizer
+from nsa.feature_map_shape_normalizers import (
+    ViTFeatureMapShapeNormalizer,
+    MLPFeatureMapShapeNormalizer,
+)
 
 
 @torch.no_grad()
@@ -10,6 +13,7 @@ from nsa.feature_map_shape_normalizers import ViTFeatureMapShapeNormalizer
     "shape, shape_normalizer",
     [
         ((10, 17, 768), ViTFeatureMapShapeNormalizer()),
+        ((10, 32), MLPFeatureMapShapeNormalizer()),
     ],
 )
 def test_feature_map_transform(shape, shape_normalizer):
