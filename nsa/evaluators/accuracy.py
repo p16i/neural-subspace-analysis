@@ -37,6 +37,7 @@ class AccuracyWithLowRankProjectionEvaluator(EvaluatorWithLowRankProjection):
             model=model,
             layer=layer,
             dataloader=dataloader,
+            device=device,
         )
 
         for x, y in tqdm(dataloader, desc=f"[layer={layer}] evaluating accuracy", disable=not verbose):

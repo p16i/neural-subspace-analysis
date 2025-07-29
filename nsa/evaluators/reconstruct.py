@@ -40,6 +40,7 @@ class ReconstructionErrorWithLowRankProjectionEvaluator(EvaluatorWithLowRankProj
             model=model,
             layer=layer,
             dataloader=dataloader,
+            device=device,
         )
 
         for batch in tqdm(
