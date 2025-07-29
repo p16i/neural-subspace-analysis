@@ -13,7 +13,6 @@ from nsa import utils
     ],
 )
 def test(start, stop, step, expected):
-
     np.testing.assert_equal(utils.arange_with_grid(start, stop, step=step), expected)
 
 
@@ -86,9 +85,7 @@ def test_solve_eigh_basic():
     # Check reconstruction
     A_recon = eigvecs @ np.diag(eigvals) @ eigvecs.T
     np.testing.assert_allclose(A, A_recon, rtol=1e-6)
-    assert (
-        eigvals[:-1] - eigvals[1:] >= 0
-    ).all(), "Eigenvalues should be sorted in ascending order"
+    assert (eigvals[:-1] - eigvals[1:] >= 0).all(), "Eigenvalues should be sorted in ascending order"
 
 
 def test_solve_eigh_identity():

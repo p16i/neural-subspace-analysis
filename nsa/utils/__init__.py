@@ -3,7 +3,7 @@ import typing
 
 import numpy as np
 import torch
-from scipy.stats import ortho_group  # type: ignor
+from scipy.stats import ortho_group
 
 
 def get_device() -> str:

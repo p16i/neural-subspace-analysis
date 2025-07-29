@@ -15,7 +15,6 @@ from nsa import estimators
     ],
 )
 def test_estimate_cov_2d_tensor(N, d, bs):
-
     torch.manual_seed(1)
 
     X = torch.randint(0, 10, size=(N, d))
@@ -42,7 +41,6 @@ def test_estimate_cov_2d_tensor(N, d, bs):
     ],
 )
 def test_estimate_cov_4d_tensor(N, d, h, w, bs):
-
     torch.manual_seed(1)
 
     X = torch.randint(0, 10, size=(N, d, h, w))

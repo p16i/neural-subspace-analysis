@@ -17,7 +17,6 @@ from nsa.feature_map_shape_normalizers import (
     ],
 )
 def test_feature_map_transform(shape, shape_normalizer):
-
     x = torch.randn(*shape)
 
     # Apply the feature map transform

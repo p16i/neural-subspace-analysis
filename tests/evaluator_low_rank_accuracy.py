@@ -51,9 +51,7 @@ class DummyViT(torch.nn.Module):
         ),  # Identity shape normalizer
     ],
 )
-def test_accuracy_with_low_rank_projection_evaluator(
-    model, feature_map_shape, d, shape_normalizer
-):
+def test_accuracy_with_low_rank_projection_evaluator(model, feature_map_shape, d, shape_normalizer):
     # Create dummy data: 10 samples, 4 features, 3 classes
     X = torch.randn(10, *feature_map_shape)  # 4 channels, 8x8 spatial dimensions
     y = torch.tensor([0, 1, 2, 0, 1, 2, 0, 1, 2, 0])
