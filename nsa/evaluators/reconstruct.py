@@ -50,6 +50,8 @@ class ReconstructionErrorWithLowRankProjectionEvaluator(EvaluatorWithLowRankProj
         ):
             x = batch[0] if isinstance(batch, Sequence) else batch
 
+            x = x.to(device)
+
             output = model(x).detach().cpu()  # Ensure logits are on CPU
 
             norm = torch.linalg.norm(output, ord=2, dim=1)
