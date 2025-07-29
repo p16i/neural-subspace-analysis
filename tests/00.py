@@ -1,4 +1,4 @@
-from nsa.foo import foo
+from subana.foo import foo
 
 
 def test_foo():

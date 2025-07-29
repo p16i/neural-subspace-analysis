@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import torch
 
-from nsa.feature_map_shape_normalizers import (
+from subana.feature_map_shape_normalizers import (
     MLPFeatureMapShapeNormalizer,
     ViTFeatureMapShapeNormalizer,
 )

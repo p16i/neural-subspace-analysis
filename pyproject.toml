@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "nsa"
+name = "subana"
 version = "0.0.1"
 description = "This is a template repository for Python projects that use Poetry for their dependency management."
 authors = ["Pat Chormai <pat.chormai@gmail.com>"]
@@ -7,7 +7,7 @@ repository = "https://github.com/p16i/neural-subspace-analysis"
 documentation = "https://p16i.github.io/neural-subspace-analysis/"
 readme = "README.md"
 packages = [
-  {include = "nsa"}
+  {include = "subana"}
 ]
 
 [tool.poetry.dependencies]

@@ -4,8 +4,8 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
-from nsa.evaluators.accuracy import AccuracyWithLowRankProjectionEvaluator
-from nsa.feature_map_shape_normalizers import ViTFeatureMapShapeNormalizer
+from subana.evaluators.accuracy import AccuracyWithLowRankProjectionEvaluator
+from subana.feature_map_shape_normalizers import ViTFeatureMapShapeNormalizer
 
 
 class DummyCNN(torch.nn.Module):

@@ -4,8 +4,8 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from nsa import utils
-from nsa.feature_map_shape_normalizers.interface import FeatureMapShapeNormalizer
+from subana import utils
+from subana.feature_map_shape_normalizers.interface import FeatureMapShapeNormalizer
 
 ATTRIBUTE_OUTPUT_KEY = "__output"
 

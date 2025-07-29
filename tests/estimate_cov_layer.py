@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset
 
-from nsa import estimators, utils
+from subana import estimators, utils
 
 
 class Case:

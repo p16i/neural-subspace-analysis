@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import torch
 
-from nsa import utils
+from subana import utils
 
 
 @pytest.mark.parametrize(

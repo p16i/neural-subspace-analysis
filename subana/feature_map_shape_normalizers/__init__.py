@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from nsa import intercepts
+from subana import intercepts
 
 from .interface import FeatureMapShapeNormalizer
 from .mlps import MLPFeatureMapShapeNormalizer

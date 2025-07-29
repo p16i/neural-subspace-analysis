@@ -4,10 +4,10 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
-from nsa.evaluators import (
+from subana.evaluators import (
     ReconstructionErrorWithLowRankProjectionEvaluator,
 )
-from nsa.feature_map_shape_normalizers import ViTFeatureMapShapeNormalizer
+from subana.feature_map_shape_normalizers import ViTFeatureMapShapeNormalizer
 
 
 class DummyModel(torch.nn.Module):

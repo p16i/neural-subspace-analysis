@@ -6,7 +6,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 from tqdm.autonotebook import tqdm
 
-from nsa import feature_map_shape_normalizers, intercepts, utils
+from subana import feature_map_shape_normalizers, intercepts, utils
 
 
 def estimate_cov_mat_at_layer(

@@ -6,9 +6,9 @@ import torch
 from torchmetrics import MeanMetric
 from tqdm.autonotebook import tqdm
 
-from nsa import intercepts
-from nsa.feature_map_shape_normalizers import resolve_shape_normalizer
-from nsa.utils.metrics import ArrayMetric
+from subana import intercepts
+from subana.feature_map_shape_normalizers import resolve_shape_normalizer
+from subana.utils.metrics import ArrayMetric
 
 from .interface import EvaluatorWithLowRankProjection
 

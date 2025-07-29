@@ -3,7 +3,7 @@ import pytest
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-from nsa import estimators
+from subana import estimators
 
 
 @pytest.mark.parametrize(
