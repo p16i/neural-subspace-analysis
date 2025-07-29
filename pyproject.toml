@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "subana"
-version = "0.0.2"
+version = "0.0.3"
 description = "This is a template repository for Python projects that use Poetry for their dependency management."
 authors = ["Pat Chormai <pat.chormai@gmail.com>"]
 repository = "https://github.com/p16i/neural-subspace-analysis"
