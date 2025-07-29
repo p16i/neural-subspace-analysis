@@ -67,7 +67,6 @@ def construct_fh_with_projection(
         if shape_normalizer is not None:
             out = shape_normalizer.to_cnn_shape(out)
 
-        print(out.shape)
         out = F.conv2d(out, UUT)
 
         # decanonicalize the featuremap shape
