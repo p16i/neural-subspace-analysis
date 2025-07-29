@@ -38,6 +38,7 @@ def estimate_cov_mat_at_layer(
         model=model,
         layer=layer,
         dataloader=dataloader,
+        device=device,
     )
 
     hook = None
