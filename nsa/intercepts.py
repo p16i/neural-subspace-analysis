@@ -33,8 +33,11 @@ def get_module_for_layer(model: nn.Module, layer: str) -> nn.Module:
         parsed_attr_name = utils.parse_number_if_possible(attr_name)
 
         if parsed_attr_name is not None:
-            assert isinstance(parent_module, nn.Sequential)
-            assert isinstance(parsed_attr_name, int)
+            if not isinstance(parent_module, nn.Sequential):
+                raise ValueError(f"Expected nn.Sequential, got {type(parent_module)}")  # noqa: TRY003
+
+            if not isinstance(parsed_attr_name, int):
+                raise ValueError(f"Expected integer index, got {parsed_attr_name} of type {type(parsed_attr_name)}")  # noqa: TRY003
 
             parent_module = parent_module[parsed_attr_name]
         else:
@@ -50,10 +53,10 @@ def construct_fh_with_projection(
     shape_normalizer: typing.Optional[FeatureMapShapeNormalizer] = None,
     device="cpu",
 ) -> typing.Callable:
-
     d, K = U.shape
 
-    assert d >= K
+    if not (d >= K):
+        raise ValueError(f"Expected d >= K, got d={d}, K={K}")  # noqa: TRY003
 
     UUT = (U @ U.T).unsqueeze(2).unsqueeze(3).to(device)
 
@@ -70,9 +73,8 @@ def construct_fh_with_projection(
         # decanonicalize the featuremap shape
         if shape_normalizer is not None:
             out = shape_normalizer.to_original_shape(out)
-            assert (
-                out.shape == orig_shape
-            ), f"Expected shape {orig_shape}, got {out.shape}"
+            if out.shape != orig_shape:
+                raise ValueError(f"Expected shape {orig_shape}, got {out.shape}")  # noqa: TRY003
 
         return out.reshape(orig_shape)
 
@@ -85,7 +87,6 @@ def get_feature_map_shape(
     dataloader: torch.utils.data.DataLoader,
     device: str = "cpu",
 ) -> torch.Size:
-
     hook = None
     try:
         batch = next(iter(dataloader))

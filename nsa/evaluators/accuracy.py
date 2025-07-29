@@ -22,7 +22,6 @@ class AccuracyWithLowRankProjectionEvaluator(EvaluatorWithLowRankProjection):
         return ["acc", "xent"]
 
     def evaluate(self, model, layer, dataloader, U, arr_ks, device="cpu", verbose=True):
-
         n = len(arr_ks)
         arr_metric_acc = ArrayMetric(
             n=n,
@@ -39,9 +38,7 @@ class AccuracyWithLowRankProjectionEvaluator(EvaluatorWithLowRankProjection):
             dataloader=dataloader,
         )
 
-        for x, y in tqdm(
-            dataloader, desc=f"[layer={layer}] evaluating accuracy", disable=not verbose
-        ):
+        for x, y in tqdm(dataloader, desc=f"[layer={layer}] evaluating accuracy", disable=not verbose):
             x = x.to(device)
 
             for kix, k in enumerate(arr_ks):
@@ -65,9 +62,6 @@ class AccuracyWithLowRankProjectionEvaluator(EvaluatorWithLowRankProjection):
                     xent = nn.functional.cross_entropy(logits, y, reduction="none")
                     arr_metric_acc.update(kix, logits, y)
                     arr_metric_xent.update(kix, xent)
-
-                except Exception as e:
-                    raise e
                 finally:
                     if hook is not None:
                         hook.remove()
@@ -75,8 +69,6 @@ class AccuracyWithLowRankProjectionEvaluator(EvaluatorWithLowRankProjection):
         arr_metric_acc = arr_metric_acc.compute()
         arr_metric_xent = arr_metric_xent.compute()
 
-        data = dict(
-            zip(["k", *self.metric_keys], [arr_ks, arr_metric_acc, arr_metric_xent])
-        )
+        data = dict(zip(["k", *self.metric_keys], [arr_ks, arr_metric_acc, arr_metric_xent]))
 
         return pd.DataFrame(data=data)

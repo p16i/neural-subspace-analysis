@@ -9,7 +9,7 @@ class ArrayMetric(Metric):
     def __init__(self, n: int, base_metric: Metric):
         self.n = n
         self.basket = []
-        for i in range(n):
+        for _ in range(n):
             self.basket.append(deepcopy(base_metric))
 
     def update(self, ix: int, *args):

@@ -1,2 +1,4 @@
-from .accuracy import AccuracyWithLowRankProjectionEvaluator
-from .reconstruct import ReconstructionErrorWithLowRankProjectionEvaluator
+from .accuracy import AccuracyWithLowRankProjectionEvaluator as AccuracyWithLowRankProjectionEvaluator
+from .reconstruct import (
+    ReconstructionErrorWithLowRankProjectionEvaluator as ReconstructionErrorWithLowRankProjectionEvaluator,
+)

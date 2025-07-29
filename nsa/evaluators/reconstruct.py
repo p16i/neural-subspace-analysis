@@ -14,7 +14,6 @@ from .interface import EvaluatorWithLowRankProjection
 
 
 class ReconstructionErrorWithLowRankProjectionEvaluator(EvaluatorWithLowRankProjection):
-
     @property
     def metric_keys(self):
         return ["norm", "recon_err", "cossim"]
@@ -68,21 +67,14 @@ class ReconstructionErrorWithLowRankProjectionEvaluator(EvaluatorWithLowRankProj
                     )
                     recon_output = model(x).detach().cpu()
 
-                    assert len(output) == len(recon_output)
+                    np.testing.assert_equal(len(output), len(recon_output))
 
-                    err = torch.linalg.norm(
-                        output - recon_output, ord=2, dim=1
-                    )  # Compute reconstruction error
+                    err = torch.linalg.norm(output - recon_output, ord=2, dim=1)  # Compute reconstruction error
                     arr_metric_recon.update(kix, err.cpu())
 
                     # fixme add cosine
-                    cosine_sim = torch.nn.functional.cosine_similarity(
-                        output, recon_output, dim=1
-                    )
+                    cosine_sim = torch.nn.functional.cosine_similarity(output, recon_output, dim=1)
                     arr_metric_cosine.update(kix, cosine_sim.cpu())
-
-                except Exception as e:
-                    raise e
                 finally:
                     if hook is not None:
                         hook.remove()
@@ -93,8 +85,6 @@ class ReconstructionErrorWithLowRankProjectionEvaluator(EvaluatorWithLowRankProj
         arr_metric_recon = arr_metric_recon.compute()
         arr_metric_cosine = arr_metric_cosine.compute()
 
-        data = dict(
-            zip(["k", *self.metric_keys], [arr_ks, arr_metric_norm, arr_metric_recon, arr_metric_cosine])
-        )
+        data = dict(zip(["k", *self.metric_keys], [arr_ks, arr_metric_norm, arr_metric_recon, arr_metric_cosine]))
 
         return pd.DataFrame(data=data)

@@ -40,9 +40,7 @@ def estimate_cov_mat_at_layer(
         module = intercepts.get_module_for_layer(model=model, layer=layer)
         hook = module.register_forward_hook(intercepts.fh_intercept_output)
 
-        for batch in tqdm(
-            dataloader, desc=f"[layer={layer}] estimating covariance matrix"
-        ):
+        for batch in tqdm(dataloader, desc=f"[layer={layer}] estimating covariance matrix"):
             x = batch[0] if isinstance(batch, Sequence) else batch
 
             x = x.to(device)
@@ -53,9 +51,6 @@ def estimate_cov_mat_at_layer(
                 layer_output = transform(layer_output)
 
             estimator.update(layer_output)
-
-    except Exception as e:
-        raise e
     finally:
         if hook is not None:
             hook.remove()
@@ -73,7 +68,8 @@ class CovarianceEstimator:
 
     @torch.no_grad()
     def update(self, x: torch.Tensor):
-        assert len(x.shape) in [2, 4]
+        if len(x.shape) not in [2, 4]:
+            raise ValueError(f"Expected input tensor with 2 or 4 dimensions, got shape {x.shape}")  # noqa: TRY003
 
         # check whehter we have Conv2D output
         if len(x.shape) == 4:
@@ -100,6 +96,7 @@ class CovarianceEstimator:
         return self._N
 
     def compute(self):
-        assert self.cov_mat is not None
+        if self.cov_mat is None:
+            raise ValueError("Covariance matrix has not been computed yet.")  # noqa: TRY003
 
         return self.cov_mat.detach()

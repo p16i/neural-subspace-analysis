@@ -11,11 +11,11 @@ from nsa.feature_map_shape_normalizers import ViTFeatureMapShapeNormalizer
 
 
 class DummyModel(torch.nn.Module):
-    def __init__(self, W=None, b=None):
+    def __init__(self):
         super().__init__()
         self.layer1 = nn.Identity()
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.layer1(x)
 
 

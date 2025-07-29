@@ -10,9 +10,9 @@ from nsa import estimators
 
 
 class Case:
-    input_shape: typing.Tuple[int, ...] = ()
+    input_shape: tuple[int, ...] = ()
 
-    def groundtruth(self, x: torch.Tensor) -> typing.Tuple[int, torch.Tensor]:
+    def groundtruth(self, x: torch.Tensor) -> tuple[int, torch.Tensor]:
         pass
 
     def construct_additional_transform(
@@ -24,7 +24,7 @@ class Case:
 class CaseMLP(Case):
     input_shape = (10, 64)
 
-    def groundtruth(self, x: torch.Tensor) -> typing.Tuple[int, torch.Tensor]:
+    def groundtruth(self, x: torch.Tensor) -> tuple[int, torch.Tensor]:
         # For MLP, we assume the input is flattened
         assert len(x.shape) == 2, f"Expected 2D tensor, got {x.shape}"
 
@@ -42,7 +42,7 @@ class CaseMLP(Case):
 class CaseCNN(Case):
     input_shape = (10, 32, 8, 8)
 
-    def groundtruth(self, x: torch.Tensor) -> typing.Tuple[int, torch.Tensor]:
+    def groundtruth(self, x: torch.Tensor) -> tuple[int, torch.Tensor]:
         # For CNN, flatten spatial dimensions and channels
         assert len(x.shape) == 4, f"Expected 4D tensor, got {x.shape}"
         n, c, h, w = x.shape
@@ -63,7 +63,7 @@ class CaseCNN(Case):
 class CaseViT(Case):
     input_shape = (10, 16 + 1, 64)  # (batch, num_patches + [cls], embed_dim)
 
-    def groundtruth(self, x: torch.Tensor) -> typing.Tuple[int, torch.Tensor]:
+    def groundtruth(self, x: torch.Tensor) -> tuple[int, torch.Tensor]:
         # x: (n, num_patches, embed_dim)
         assert len(x.shape) == 3, f"Expected 3D tensor, got {x.shape}"
         n, num_patches, embed_dim = x.shape
@@ -84,7 +84,7 @@ class CaseViT(Case):
 class CaseViTCLSOnly(Case):
     input_shape = (10, 16 + 1, 64)  # (batch, num_patches + [cls], embed_dim)
 
-    def groundtruth(self, x: torch.Tensor) -> typing.Tuple[int, torch.Tensor]:
+    def groundtruth(self, x: torch.Tensor) -> tuple[int, torch.Tensor]:
         # x: (n, num_patches, embed_dim)
         assert len(x.shape) == 3, f"Expected 3D tensor, got {x.shape}"
         n, num_patches, embed_dim = x.shape
@@ -108,7 +108,6 @@ class CaseViTCLSOnly(Case):
 )
 @torch.no_grad()
 def test(case: Case):
-
     class Model(torch.nn.Module):
         def __init__(self):
             super().__init__()

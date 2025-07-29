@@ -77,9 +77,7 @@ def test_projection(model, shape_normalizer):
     hook = None
     try:
         hook = model.act1.register_forward_hook(
-            intercepts.construct_fh_with_projection(
-                U, shape_normalizer=shape_normalizer
-            )
+            intercepts.construct_fh_with_projection(U, shape_normalizer=shape_normalizer)
         )
 
         actual = model(x).cpu().numpy()
@@ -92,7 +90,6 @@ def test_projection(model, shape_normalizer):
 
 
 def test_intercept():
-
     rng = torch.Generator()
     rng.manual_seed(1)
 
@@ -100,13 +97,11 @@ def test_intercept():
     x = torch.randn((2, 10), generator=rng)
 
     model = nn.Sequential(
-        OrderedDict(
-            [
-                ("lin1", nn.Linear(10, d)),
-                ("act1", nn.ReLU()),
-                ("lin2", nn.Linear(d, 5)),
-            ]
-        )
+        OrderedDict([
+            ("lin1", nn.Linear(10, d)),
+            ("act1", nn.ReLU()),
+            ("lin2", nn.Linear(d, 5)),
+        ])
     )
 
     with torch.no_grad():
@@ -121,9 +116,7 @@ def test_intercept():
 
         model(x)
 
-        actual = (
-            getattr(model.act1, intercepts.ATTRIBUTE_OUTPUT_KEY).detach().cpu().numpy()
-        )
+        actual = getattr(model.act1, intercepts.ATTRIBUTE_OUTPUT_KEY).detach().cpu().numpy()
 
         np.testing.assert_allclose(actual, expected, atol=1e-6)
 
@@ -133,16 +126,16 @@ def test_intercept():
 
 
 @pytest.mark.parametrize(
-    "model,input,layer,expecteted_shape",
+    "model,inp,layer,expecteted_shape",
     [
         (MLP3(), torch.randn(20, 784), "act1", (20, 100)),
         (CNN3(), torch.randn(20, 1, 28, 28), "avgpool1", (20, 100, 18, 18)),
     ],
 )
-def test_feature_map_shape(model, input, layer, expecteted_shape):
-    b = input.shape[0]
+def test_feature_map_shape(model, inp, layer, expecteted_shape):
+    b = inp.shape[0]
 
-    dl = DataLoader(TensorDataset(input), batch_size=b)
+    dl = DataLoader(TensorDataset(inp), batch_size=b)
 
     actual = intercepts.get_feature_map_shape(
         model=model,

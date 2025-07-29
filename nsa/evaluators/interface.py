@@ -1,6 +1,5 @@
 import typing
 from abc import ABC, abstractmethod
-from typing import List
 
 import pandas as pd
 import torch
@@ -14,9 +13,7 @@ class EvaluatorWithLowRankProjection(ABC):
     Abstract base class for evaluators.
     """
 
-    feature_map_transform: typing.Optional[
-        typing.Callable[[list[torch.Tensor]], torch.Tensor]
-    ]
+    feature_map_transform: typing.Optional[typing.Callable[[list[torch.Tensor]], torch.Tensor]]
 
     @abstractmethod
     def evaluate(
@@ -36,5 +33,5 @@ class EvaluatorWithLowRankProjection(ABC):
 
     @property
     @abstractmethod
-    def metric_keys(self) -> List[str]:
+    def metric_keys(self) -> list[str]:
         pass
