@@ -19,6 +19,7 @@ class ReconstructionErrorWithLowRankProjectionEvaluator(EvaluatorWithLowRankProj
         return ["norm", "recon_err", "cossim"]
 
     def evaluate(self, model, layer, dataloader, U, arr_ks, device="cpu", verbose=True):
+        d, _ = U.shape
         n = len(arr_ks)
 
         metric_norm = MeanMetric()
@@ -87,4 +88,6 @@ class ReconstructionErrorWithLowRankProjectionEvaluator(EvaluatorWithLowRankProj
 
         data = dict(zip(["k", *self.metric_keys], [arr_ks, arr_metric_norm, arr_metric_recon, arr_metric_cosine]))
 
-        return pd.DataFrame(data=data)
+        df = pd.DataFrame(data=data)
+        df["d"] = d
+        return df

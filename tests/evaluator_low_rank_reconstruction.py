@@ -49,9 +49,9 @@ def test_reconstruction_error_with_low_rank_projection_evaluator(feature_map_sha
         verbose=False,
     )
 
-    assert df.shape == (len(arr_ks), 4)  # 3 metrics
+    assert df.shape == (len(arr_ks), 5)  # 3 metrics
 
-    assert df.columns.tolist() == ["k", *evaluator.metric_keys]
+    assert sorted(df.columns.tolist()) == sorted(["d", "k", *evaluator.metric_keys])
 
     assert np.all(df["norm"] >= 0)
     assert np.all(df["recon_err"] >= 0)

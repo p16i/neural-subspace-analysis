@@ -22,6 +22,7 @@ class AccuracyWithLowRankProjectionEvaluator(EvaluatorWithLowRankProjection):
         return ["acc", "xent"]
 
     def evaluate(self, model, layer, dataloader, U, arr_ks, device="cpu", verbose=True):
+        d, _ = U.shape
         n = len(arr_ks)
         arr_metric_acc = ArrayMetric(
             n=n,
@@ -69,4 +70,6 @@ class AccuracyWithLowRankProjectionEvaluator(EvaluatorWithLowRankProjection):
 
         data = dict(zip(["k", *self.metric_keys], [arr_ks, arr_metric_acc, arr_metric_xent]))
 
-        return pd.DataFrame(data=data)
+        df = pd.DataFrame(data=data)
+        df["d"] = d
+        return df

@@ -74,9 +74,9 @@ def test_accuracy_with_low_rank_projection_evaluator(model, feature_map_shape, d
         verbose=False,
     )
 
-    assert df.shape == (2, 3)  # 2 ks, 3 metrics
+    assert df.shape == (2, 4)  # 2 ks, 4 metrics
 
-    assert df.columns.tolist() == ["k", *evaluator.metric_keys]
+    assert sorted(df.columns.tolist()) == sorted(["d", "k", *evaluator.metric_keys])
 
     assert np.all(df["acc"] >= 0)
     assert np.all(df["xent"] >= 0)
