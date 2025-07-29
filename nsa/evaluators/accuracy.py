@@ -1,15 +1,11 @@
-from torch import nn
-
-from torchmetrics.classification import Accuracy
-from torchmetrics import MeanMetric
-
-from tqdm.autonotebook import tqdm
-
 import pandas as pd
+from torch import nn
+from torchmetrics import MeanMetric
+from torchmetrics.classification import Accuracy
+from tqdm.autonotebook import tqdm
 
 from nsa import intercepts
 from nsa.feature_map_shape_normalizers import (
-    FeatureMapShapeNormalizer,
     resolve_shape_normalizer,
 )
 from nsa.utils.metrics import ArrayMetric

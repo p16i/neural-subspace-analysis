@@ -1,14 +1,13 @@
 import typing
-import torch
 
+import torch
 from torch import nn
 
-from nsa import utils, intercepts
+from nsa import intercepts, utils
 
 from .interface import FeatureMapShapeNormalizer
-
-from .vits import ViTFeatureMapShapeNormalizer
 from .mlps import MLPFeatureMapShapeNormalizer
+from .vits import ViTFeatureMapShapeNormalizer
 
 
 @torch.no_grad()

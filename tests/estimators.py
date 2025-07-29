@@ -1,9 +1,8 @@
-import typing
-import pytest
 import numpy as np
+import pytest
 import torch
-from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
+
 from nsa import estimators
 
 

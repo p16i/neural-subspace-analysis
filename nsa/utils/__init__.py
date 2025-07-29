@@ -1,10 +1,8 @@
-import typing
-import torch
-
 import re
+import typing
 
 import numpy as np
-
+import torch
 from scipy.stats import ortho_group  # type: ignor
 
 

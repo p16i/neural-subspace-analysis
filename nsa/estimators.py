@@ -1,13 +1,12 @@
 import typing
-import torch
+from collections.abc import Sequence
 
-from typing import Sequence
+import torch
 from torch import nn
 from torch.utils.data import DataLoader
-
 from tqdm.autonotebook import tqdm
 
-from nsa import utils, intercepts
+from nsa import intercepts, utils
 
 
 def estimate_cov_mat_at_layer(

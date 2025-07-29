@@ -1,8 +1,7 @@
-import pytest
-
 import numpy as np
-
+import pytest
 import torch
+
 from nsa import utils
 
 

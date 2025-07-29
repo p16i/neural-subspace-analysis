@@ -1,11 +1,10 @@
-from typing import Sequence
+from collections.abc import Sequence
+
+import numpy as np
+import pandas as pd
+import torch
 from torchmetrics import MeanMetric
 from tqdm.autonotebook import tqdm
-import torch
-import numpy as np
-
-
-import pandas as pd
 
 from nsa import intercepts
 from nsa.feature_map_shape_normalizers import resolve_shape_normalizer

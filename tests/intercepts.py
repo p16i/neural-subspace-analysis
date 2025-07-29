@@ -1,19 +1,12 @@
-import pytest
-
-import numpy as np
-
-from torch.utils.data import DataLoader, TensorDataset
-
 from collections import OrderedDict
 
+import numpy as np
+import pytest
 import torch
 from torch import nn
+from torch.utils.data import DataLoader, TensorDataset
 
-from nsa import intercepts, utils, feature_map_shape_normalizers
-from nsa.feature_map_shape_normalizers import (
-    MLPFeatureMapShapeNormalizer,
-    ViTFeatureMapShapeNormalizer,
-)
+from nsa import feature_map_shape_normalizers, intercepts, utils
 
 
 class MLP3(nn.Module):
@@ -41,7 +34,7 @@ class CNN3(nn.Module):
         self.d = d
         self.conv1 = nn.Conv2d(1, d, kernel_size=3, padding=1)
         self.act1 = nn.ReLU()
-        self.avgpool1 = nn.AdaptiveAvgPool2d(18) 
+        self.avgpool1 = nn.AdaptiveAvgPool2d(18)
         self.conv2 = nn.Conv2d(d, d, kernel_size=3, padding=1)
         self.act2 = nn.ReLU()
         self.avgpool = nn.AdaptiveAvgPool2d(1)  # Outpu
