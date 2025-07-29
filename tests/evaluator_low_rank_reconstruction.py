@@ -1,6 +1,5 @@
-import pytest
 import numpy as np
-
+import pytest
 import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
@@ -8,7 +7,6 @@ from torch.utils.data import DataLoader, TensorDataset
 from nsa.evaluators import (
     ReconstructionErrorWithLowRankProjectionEvaluator,
 )
-
 from nsa.feature_map_shape_normalizers import ViTFeatureMapShapeNormalizer
 
 
@@ -28,9 +26,7 @@ class DummyModel(torch.nn.Module):
         ((17, 8), 8, ViTFeatureMapShapeNormalizer()),  # Identity shape normalizer
     ],
 )
-def test_reconstruction_error_with_low_rank_projection_evaluator(
-    feature_map_shape, d, shape_normalizer
-):
+def test_reconstruction_error_with_low_rank_projection_evaluator(feature_map_shape, d, shape_normalizer):
     # Create dummy data: 10 samples, 4 features, 3 classes
     X = torch.randn(10, *feature_map_shape)  # 4 channels, 8x8 spatial dimensions
     dataset = TensorDataset(X)
