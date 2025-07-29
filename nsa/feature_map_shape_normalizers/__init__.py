@@ -27,10 +27,6 @@ def resolve_shape_normalizer(
     elif len(shape) == 2:
         return layer, MLPFeatureMapShapeNormalizer()
     elif len(shape) == 3:
-        if "[cls]" in layer:
-            layer = layer.replace("[cls]", "")
-            raise NotImplementedError()
-        else:
-            return layer, ViTFeatureMapShapeNormalizer()
+        return layer, ViTFeatureMapShapeNormalizer()
     else:
         raise ValueError(f"Unsupported shape {shape} for layer {layer}. Expected 1D, 3D, or 4D tensor shapes.")  # noqa: TRY003

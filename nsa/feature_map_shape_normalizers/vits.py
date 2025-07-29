@@ -6,6 +6,16 @@ from .interface import FeatureMapShapeNormalizer
 class ViTFeatureMapShapeNormalizer(FeatureMapShapeNormalizer):
     @staticmethod
     def to_cnn_shape(x: torch.Tensor) -> torch.Tensor:
+        """_summary_
+
+        x.shape = (batch_size, num_patches, embed_dim)
+
+        Args:
+            x (torch.Tensor): _description_
+
+        Returns:
+            torch.Tensor: _description_
+        """
         assert len(x.shape) == 3  # noqa: S101
 
         x = x.permute(0, 2, 1).unsqueeze(3)

@@ -6,7 +6,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 from tqdm.autonotebook import tqdm
 
-from nsa import intercepts, utils
+from nsa import feature_map_shape_normalizers, intercepts, utils
 
 
 def estimate_cov_mat_at_layer(
@@ -14,7 +14,7 @@ def estimate_cov_mat_at_layer(
     layer: str,
     dataloader: DataLoader,
     device="cpu",
-    transform: typing.Optional[typing.Callable] = None,
+    pre_transform: typing.Optional[typing.Callable] = None,
 ) -> torch.Tensor:
     """Estimate (uncentered) covariance matrix at a given layer.
 
@@ -23,7 +23,7 @@ def estimate_cov_mat_at_layer(
         layer (str): at which layer we want to extract the covariance matrix
         dataloader (DataLoader): use the first item in each batch as input to the model.
         device (str, optional): _description_. Defaults to "cpu".
-        transform (typing.Optional[typing.Callable], optional): _description_. Defaults to None.
+        pre_transform (typing.Optional[typing.Callable], optional): _description_. Defaults to None.
 
     Raises:
         e: _description_
@@ -33,6 +33,12 @@ def estimate_cov_mat_at_layer(
     """
 
     estimator = CovarianceEstimator()
+
+    layer, shape_normalizer = feature_map_shape_normalizers.resolve_shape_normalizer(
+        model=model,
+        layer=layer,
+        dataloader=dataloader,
+    )
 
     hook = None
 
@@ -47,8 +53,12 @@ def estimate_cov_mat_at_layer(
             _ = model(x)
 
             layer_output = intercepts.get_module_output(module)
-            if transform is not None:
-                layer_output = transform(layer_output)
+
+            if pre_transform is not None:
+                layer_output = pre_transform(layer_output)
+
+            if shape_normalizer is not None:
+                layer_output = shape_normalizer.to_cnn_shape(layer_output)
 
             estimator.update(layer_output)
     finally:
@@ -71,7 +81,6 @@ class CovarianceEstimator:
         if len(x.shape) not in [2, 4]:
             raise ValueError(f"Expected input tensor with 2 or 4 dimensions, got shape {x.shape}")  # noqa: TRY003
 
-        # check whehter we have Conv2D output
         if len(x.shape) == 4:
             x = utils.flatten_4d_tensor(x)
 

@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset
 
-from nsa import estimators
+from nsa import estimators, utils
 
 
 class Case:
@@ -52,12 +52,7 @@ class CaseCNN(Case):
         return c, cov
 
     def construct_additional_transform(self):
-        # Flatten spatial dimensions and channels for covariance computation
-        def transform(x):
-            n, c, h, w = x.shape
-            return x.permute(0, 2, 3, 1).reshape(n * h * w, c)
-
-        return transform
+        return None
 
 
 class CaseViT(Case):
@@ -67,18 +62,13 @@ class CaseViT(Case):
         # x: (n, num_patches, embed_dim)
         assert len(x.shape) == 3, f"Expected 3D tensor, got {x.shape}"
         n, num_patches, embed_dim = x.shape
-        # Flatten all patches into a single batch
+
         x_flat = x.reshape(n * num_patches, embed_dim)
         cov = (x_flat.T @ x_flat) / (n * num_patches)
         return embed_dim, cov
 
     def construct_additional_transform(self):
-        # Flatten all patches into a single batch for covariance computation
-        def transform(x):
-            n, num_patches, embed_dim = x.shape
-            return x.reshape(n * num_patches, embed_dim)
-
-        return transform
+        return None
 
 
 class CaseViTCLSOnly(Case):
@@ -97,17 +87,22 @@ class CaseViTCLSOnly(Case):
         # Extract only the [cls] token for each sample
         def transform(x):
             # x: (n, num_patches, embed_dim)
-            return x[:, 0, :]  # (n, embed_dim)
+            return x[:, [0], :]  # (n, embed_dim)
 
         return transform
 
 
 @pytest.mark.parametrize(
-    "case",
-    [CaseMLP(), CaseCNN(), CaseViT(), CaseViTCLSOnly()],
+    "layer, case",
+    [
+        ("layer1", CaseMLP()),
+        ("layer1", CaseCNN()),
+        ("layer1", CaseViT()),
+        ("layer1", CaseViTCLSOnly()),
+    ],
 )
 @torch.no_grad()
-def test(case: Case):
+def test(layer, case: Case):
     class Model(torch.nn.Module):
         def __init__(self):
             super().__init__()
@@ -124,10 +119,10 @@ def test(case: Case):
 
     cov = estimators.estimate_cov_mat_at_layer(
         model=Model(),
-        layer="layer1",
+        layer=layer,
         dataloader=dl,
-        transform=case.construct_additional_transform(),
         device="cpu",
+        pre_transform=case.construct_additional_transform(),
     )
 
     d, expected_cov = case.groundtruth(x)
