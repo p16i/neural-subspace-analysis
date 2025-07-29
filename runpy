@@ -22,5 +22,5 @@ fi
 
 
 apptainer run \
-    --nv ./containers/py312.sif \
+    --nv ./container/py312.sif \
     "$@"
