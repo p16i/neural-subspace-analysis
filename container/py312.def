@@ -1,0 +1,24 @@
+BootStrap: docker
+From: python:3.12.1
+
+%labels
+    Author: pat.chormai@gmail.com
+    Version v0.0.1
+
+%files
+    ./pyproject.toml
+
+%environment
+    export PYTHONPATH=.
+
+%post
+  pip install --upgrade pip
+  curl -sSL https://install.python-poetry.org | python3 -
+  /root/.local/bin/poetry self add poetry-plugin-export
+  /root/.local/bin/poetry lock
+  /root/.local/bin/poetry export --all-groups --without-hashes --format=requirements.txt > requirements.txt
+  cat requirements.txt
+  pip install -r requirements.txt
+
+%test
+   python --version

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+export WANDB_DIR=/tmp
+export WANDB_CACHE_DIR=/tmp/.cache/wandb
+
+export DATA_TEMP_DIR=/tmp
+
+# make result more deterministic
+export CUBLAS_WORKSPACE_CONFIG=:4096:8
+
+export APPTAINER_BINDPATH="/home/space/datasets"
+
+if [[ $WITH_DATA -eq 1 ]]; then
+    if [ ! -f "$DATA_TEMP_DIR/imagenet.sqfs" ]; then
+        echo "copy data.."
+        # time cp ~/datasets/imagenet.sqfs /tmp/
+        # NEW UPDATED LOCATION FOR DATASETS
+        time rsync --progress ~/datasets/imagenet.sqfs $DATA_TEMP_DIR
+    fi
+    APPTAINER_BINDPATH="$APPTAINER_BINDPATH,$DATA_TEMP_DIR/imagenet.sqfs:/datasets/imagenet:image-src=/"
+fi
+
+
+apptainer run \
+    --nv ./containers/py312.sif \
+    "$@"
