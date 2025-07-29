@@ -5,4 +5,6 @@
     poetry.enable = true;
     poetry.activate.enable = true;
   };
+  git-hooks.hooks.ruff.enable = true;
+  git-hooks.hooks.ruff-format.enable = true;
 }
