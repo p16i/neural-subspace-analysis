@@ -57,8 +57,6 @@ class AccuracyWithLowRankProjectionEvaluator(EvaluatorWithLowRankProjection):
 
                     logits = model(x).detach().cpu()
 
-                    print(logits.shape)
-
                     xent = nn.functional.cross_entropy(logits, y, reduction="none")
                     arr_metric_acc.update(kix, logits, y)
                     arr_metric_xent.update(kix, xent)
